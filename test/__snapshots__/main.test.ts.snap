@@ -1,0 +1,1645 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Entire App Stack NewRelicAgent 1`] = `
+Object {
+  "Description": "Cosmos Extension: Singleton resources for the Cosmos, like CdkRepo and EcrRepo",
+  "Outputs": Object {
+    "AppLibVersion": Object {
+      "Export": Object {
+        "Name": "AppNewRelicAgentLibVersion",
+      },
+      "Value": "0.8.4",
+    },
+    "ExportsOutputFnGetAttCdkRepoName": Object {
+      "Export": Object {
+        "Name": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttCdkRepoNameE40A1139",
+      },
+      "Value": Object {
+        "Fn::GetAtt": Array [
+          "CdkRepo",
+          "Name",
+        ],
+      },
+    },
+    "ExportsOutputFnGetAttEcrRepoArn": Object {
+      "Export": Object {
+        "Name": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttEcrRepoArn0BB148DE",
+      },
+      "Value": Object {
+        "Fn::GetAtt": Array [
+          "EcrRepo",
+          "Arn",
+        ],
+      },
+    },
+    "ExportsOutputRefEcrRepo": Object {
+      "Export": Object {
+        "Name": "AppNewRelicAgentCosmos:ExportsOutputRefEcrRepoE58180DE",
+      },
+      "Value": Object {
+        "Ref": "EcrRepo",
+      },
+    },
+  },
+  "Resources": Object {
+    "CdkRepo": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "RepositoryDescription": "App CDK Repo for NewRelicAgent Cosmos.",
+        "RepositoryName": "app-newrelicagent-cdk-repo",
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+        ],
+      },
+      "Type": "AWS::CodeCommit::Repository",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "EcrRepo": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "RepositoryName": "app/newrelicagent/agent",
+        "RepositoryPolicyText": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+              ],
+              "Effect": "Allow",
+              "Principal": Object {
+                "AWS": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::2222:root",
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+        ],
+      },
+      "Type": "AWS::ECR::Repository",
+      "UpdateReplacePolicy": "Retain",
+    },
+  },
+}
+`;
+
+exports[`Entire App Stack NewRelicAgent/Dev 1`] = `
+Object {
+  "Description": "Cosmos Galaxy Extension: App resources dependant on each Aws Account.",
+  "Outputs": Object {
+    "ExportsOutputFnGetAttSharedKeyArn": Object {
+      "Export": Object {
+        "Name": "AppNewRelicAgentDevGalaxy:DevExportsOutputFnGetAttSharedKeyArn0AA779F3",
+      },
+      "Value": Object {
+        "Fn::GetAtt": Array [
+          "SharedKey",
+          "Arn",
+        ],
+      },
+    },
+  },
+  "Resources": Object {
+    "SharedKey": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "EnableKeyRotation": true,
+        "KeyPolicy": Object {
+          "Statement": Array [
+            Object {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": Object {
+                "AWS": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::2222:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Dev",
+          },
+        ],
+      },
+      "Type": "AWS::KMS::Key",
+      "UpdateReplacePolicy": "Retain",
+    },
+  },
+}
+`;
+
+exports[`Entire App Stack NewRelicAgent/Dev/Dev 1`] = `
+Object {
+  "Description": "Cosmos SolarSystem Extension: App resources dependant on each App Env, like Services and Databases.",
+  "Parameters": Object {
+    "VersionStateParam": Object {
+      "Default": "/App/NewRelicAgent/Dev/Dev/VersionState",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": Object {
+    "LicenceKey": Object {
+      "Properties": Object {
+        "GenerateSecretString": Object {},
+        "KmsKeyId": Object {
+          "Fn::ImportValue": "AppNewRelicAgentDevGalaxy:DevExportsOutputFnGetAttSharedKeyArn0AA779F3",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Dev",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "Dev",
+          },
+        ],
+      },
+      "Type": "AWS::SecretsManager::Secret",
+    },
+    "NewRelicAgentLogs": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "RetentionInDays": 30,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "NewRelicAgentService": Object {
+      "Properties": Object {
+        "Cluster": Object {
+          "Fn::ImportValue": "CoreDevDevClusterName",
+        },
+        "DeploymentConfiguration": Object {
+          "DeploymentCircuitBreaker": Object {
+            "Enable": true,
+            "Rollback": true,
+          },
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0,
+        },
+        "DeploymentController": Object {
+          "Type": "ECS",
+        },
+        "EnableECSManagedTags": false,
+        "LaunchType": "EC2",
+        "SchedulingStrategy": "DAEMON",
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Dev",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "Dev",
+          },
+        ],
+        "TaskDefinition": Object {
+          "Ref": "NewRelicAgentTask",
+        },
+      },
+      "Type": "AWS::ECS::Service",
+    },
+    "NewRelicAgentTask": Object {
+      "Properties": Object {
+        "ContainerDefinitions": Array [
+          Object {
+            "Environment": Array [
+              Object {
+                "Name": "NRIA_OVERRIDE_HOST_ROOT",
+                "Value": "/host",
+              },
+              Object {
+                "Name": "NRIA_PASSTHROUGH_ENVIRONMENT",
+                "Value": "ECS_CONTAINER_METADATA_URI,ENABLE_NRI_ECS",
+              },
+              Object {
+                "Name": "ENABLE_NRI_ECS",
+                "Value": "true",
+              },
+              Object {
+                "Name": "NRIA_VERBOSE",
+                "Value": "0",
+              },
+              Object {
+                "Name": "NRIA_CUSTOM_ATTRIBUTES",
+                "Value": "{\\"awsAccountName\\":\\"TODO: Change to Project Name\\",\\"awsEnvironment\\":\\"Dev\\",\\"nrDeployMethod\\":\\"cloudFormation\\"}",
+              },
+            ],
+            "Essential": true,
+            "Image": Object {
+              "Fn::Join": Array [
+                "",
+                Array [
+                  Object {
+                    "Fn::Select": Array [
+                      4,
+                      Object {
+                        "Fn::Split": Array [
+                          ":",
+                          Object {
+                            "Fn::Join": Array [
+                              "",
+                              Array [
+                                "arn:",
+                                Object {
+                                  "Ref": "AWS::Partition",
+                                },
+                                ":ecr:ap-southeast-2:1111:repository/app/newrelicagent/agent",
+                              ],
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  ".dkr.ecr.",
+                  Object {
+                    "Fn::Select": Array [
+                      3,
+                      Object {
+                        "Fn::Split": Array [
+                          ":",
+                          Object {
+                            "Fn::Join": Array [
+                              "",
+                              Array [
+                                "arn:",
+                                Object {
+                                  "Ref": "AWS::Partition",
+                                },
+                                ":ecr:ap-southeast-2:1111:repository/app/newrelicagent/agent",
+                              ],
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  ".",
+                  Object {
+                    "Ref": "AWS::URLSuffix",
+                  },
+                  "/app/newrelicagent/agent:",
+                  Object {
+                    "Fn::GetAtt": Array [
+                      "VersionState",
+                      "Value",
+                    ],
+                  },
+                ],
+              ],
+            },
+            "LogConfiguration": Object {
+              "LogDriver": "awslogs",
+              "Options": Object {
+                "awslogs-group": Object {
+                  "Ref": "NewRelicAgentLogs",
+                },
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "Container",
+              },
+            },
+            "MemoryReservation": 256,
+            "MountPoints": Array [
+              Object {
+                "ContainerPath": "/var/run/docker.sock",
+                "ReadOnly": false,
+                "SourceVolume": "Docker",
+              },
+              Object {
+                "ContainerPath": "/host",
+                "ReadOnly": true,
+                "SourceVolume": "Host",
+              },
+            ],
+            "Name": "Container",
+            "PortMappings": Array [
+              Object {
+                "ContainerPort": 80,
+                "Protocol": "tcp",
+              },
+            ],
+            "Privileged": true,
+            "Secrets": Array [
+              Object {
+                "Name": "NRIA_LICENSE_KEY",
+                "ValueFrom": Object {
+                  "Ref": "LicenceKey",
+                },
+              },
+            ],
+          },
+        ],
+        "ExecutionRoleArn": Object {
+          "Fn::GetAtt": Array [
+            "NewRelicAgentTaskExecutionRole",
+            "Arn",
+          ],
+        },
+        "Family": "NewRelicAgentDevNewRelicAgentTask88916CEC",
+        "NetworkMode": "host",
+        "RequiresCompatibilities": Array [
+          "EC2",
+        ],
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Dev",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "Dev",
+          },
+        ],
+        "TaskRoleArn": Object {
+          "Fn::GetAtt": Array [
+            "NewRelicAgentTaskRole",
+            "Arn",
+          ],
+        },
+        "Volumes": Array [
+          Object {
+            "Host": Object {
+              "SourcePath": "/var/run/docker.sock",
+            },
+            "Name": "Docker",
+          },
+          Object {
+            "Host": Object {
+              "SourcePath": "/",
+            },
+            "Name": "Host",
+          },
+        ],
+      },
+      "Type": "AWS::ECS::TaskDefinition",
+    },
+    "NewRelicAgentTaskExecutionRole": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Dev",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "Dev",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "NewRelicAgentTaskExecutionRoleDefaultPolicy": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ecr:ap-southeast-2:1111:repository/app/newrelicagent/agent",
+                  ],
+                ],
+              },
+            },
+            Object {
+              "Action": "ecr:GetAuthorizationToken",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "NewRelicAgentLogs",
+                  "Arn",
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Ref": "LicenceKey",
+              },
+            },
+            Object {
+              "Action": "kms:Decrypt",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::ImportValue": "AppNewRelicAgentDevGalaxy:DevExportsOutputFnGetAttSharedKeyArn0AA779F3",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "NewRelicAgentTaskExecutionRoleDefaultPolicy",
+        "Roles": Array [
+          Object {
+            "Ref": "NewRelicAgentTaskExecutionRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "NewRelicAgentTaskRole": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Dev",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "Dev",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "VersionState": Object {
+      "Properties": Object {
+        "Name": "/App/NewRelicAgent/Dev/Dev/VersionState",
+        "Tags": Object {
+          "cosmos:extension": "NewRelicAgent",
+          "cosmos:galaxy:extension": "Dev",
+          "cosmos:solarsystem:extension": "Dev",
+        },
+        "Type": "String",
+        "Value": Object {
+          "Ref": "VersionStateParam",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+  },
+}
+`;
+
+exports[`Entire App Stack NewRelicAgent/Mgt 1`] = `
+Object {
+  "Description": "Cosmos Galaxy Extension: App resources dependant on each Aws Account.",
+  "Resources": Object {
+    "SharedKey": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "EnableKeyRotation": true,
+        "KeyPolicy": Object {
+          "Statement": Array [
+            Object {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": Object {
+                "AWS": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::1111:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Mgt",
+          },
+        ],
+      },
+      "Type": "AWS::KMS::Key",
+      "UpdateReplacePolicy": "Retain",
+    },
+  },
+}
+`;
+
+exports[`Entire App Stack NewRelicAgent/Mgt/CiCd 1`] = `
+Object {
+  "Description": "Cosmos SolarSystem Extension: App resources dependant on each App Env, like Services and Databases.",
+  "Resources": Object {
+    "CdkPipeline": Object {
+      "Properties": Object {
+        "ArtifactStore": Object {
+          "Location": Object {
+            "Ref": "CdkPipelineCdkArtifactBucket",
+          },
+          "Type": "S3",
+        },
+        "Name": "App-NewRelicAgent-Cdk-Pipeline",
+        "RoleArn": "arn:aws:iam::1111:role/CoreCdkMasterRole",
+        "Stages": Array [
+          Object {
+            "Actions": Array [
+              Object {
+                "ActionTypeId": Object {
+                  "Category": "Source",
+                  "Owner": "AWS",
+                  "Provider": "CodeCommit",
+                  "Version": "1",
+                },
+                "Configuration": Object {
+                  "BranchName": "master",
+                  "PollForSourceChanges": false,
+                  "RepositoryName": Object {
+                    "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttCdkRepoNameE40A1139",
+                  },
+                },
+                "Name": "CdkCheckout",
+                "Namespace": "CdkCheckout",
+                "OutputArtifacts": Array [
+                  Object {
+                    "Name": "CdkCodeOutput",
+                  },
+                ],
+                "RoleArn": "arn:aws:iam::1111:role/CoreCdkMasterRole",
+                "RunOrder": 1,
+              },
+            ],
+            "Name": "Source",
+          },
+          Object {
+            "Actions": Array [
+              Object {
+                "ActionTypeId": Object {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Provider": "CodeBuild",
+                  "Version": "1",
+                },
+                "Configuration": Object {
+                  "EnvironmentVariables": "[{\\"name\\":\\"DIFF\\",\\"type\\":\\"PLAINTEXT\\",\\"value\\":\\"true\\"},{\\"name\\":\\"DEPLOY\\",\\"type\\":\\"PLAINTEXT\\",\\"value\\":\\"false\\"}]",
+                  "ProjectName": Object {
+                    "Ref": "CdkPipelineDeploy",
+                  },
+                },
+                "InputArtifacts": Array [
+                  Object {
+                    "Name": "CdkCodeOutput",
+                  },
+                ],
+                "Name": "CdkDiff",
+                "RoleArn": "arn:aws:iam::1111:role/CoreCdkMasterRole",
+                "RunOrder": 1,
+              },
+              Object {
+                "ActionTypeId": Object {
+                  "Category": "Approval",
+                  "Owner": "AWS",
+                  "Provider": "Manual",
+                  "Version": "1",
+                },
+                "Configuration": Object {
+                  "CustomData": "Please review the CdkDiff build.",
+                },
+                "Name": "CdkDiffApproval",
+                "RoleArn": "arn:aws:iam::1111:role/CoreCdkMasterRole",
+                "RunOrder": 2,
+              },
+            ],
+            "Name": "Diff",
+          },
+          Object {
+            "Actions": Array [
+              Object {
+                "ActionTypeId": Object {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Provider": "CodeBuild",
+                  "Version": "1",
+                },
+                "Configuration": Object {
+                  "EnvironmentVariables": "[{\\"name\\":\\"DIFF\\",\\"type\\":\\"PLAINTEXT\\",\\"value\\":\\"false\\"},{\\"name\\":\\"DEPLOY\\",\\"type\\":\\"PLAINTEXT\\",\\"value\\":\\"true\\"},{\\"name\\":\\"STACKS\\",\\"type\\":\\"PLAINTEXT\\",\\"value\\":\\"-e AppNewRelicAgentCosmos AppNewRelicAgentMgtGalaxy AppNewRelicAgentMgtCiCdSolarSystem AppNewRelicAgentDevGalaxy AppNewRelicAgentDevDevSolarSystem\\"}]",
+                  "ProjectName": Object {
+                    "Ref": "CdkPipelineDeploy",
+                  },
+                },
+                "InputArtifacts": Array [
+                  Object {
+                    "Name": "CdkCodeOutput",
+                  },
+                ],
+                "Name": "CdkDeploy",
+                "RoleArn": "arn:aws:iam::1111:role/CoreCdkMasterRole",
+                "RunOrder": 1,
+              },
+            ],
+            "Name": "Deploy",
+          },
+        ],
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:feature",
+            "Value": "CiCd",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Mgt",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "CiCd",
+          },
+        ],
+      },
+      "Type": "AWS::CodePipeline::Pipeline",
+    },
+    "CdkPipelineCdkArtifactBucket": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": Object {
+          "ServerSideEncryptionConfiguration": Array [
+            Object {
+              "ServerSideEncryptionByDefault": Object {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "LoggingConfiguration": Object {
+          "LogFilePrefix": "BucketAccessLogs/",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:feature",
+            "Value": "CiCd",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Mgt",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "CiCd",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "CdkPipelineCdkArtifactBucketPolicy": Object {
+      "Properties": Object {
+        "Bucket": Object {
+          "Ref": "CdkPipelineCdkArtifactBucket",
+        },
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "s3:*",
+              "Condition": Object {
+                "Bool": Object {
+                  "aws:SecureTransport": false,
+                },
+              },
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    Object {
+                      "Fn::GetAtt": Array [
+                        "CdkPipelineCdkArtifactBucket",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+              "Sid": "ForceSSLOnly",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "CdkPipelineDeploy": Object {
+      "Properties": Object {
+        "Artifacts": Object {
+          "Location": Object {
+            "Ref": "CdkPipelineCdkArtifactBucket",
+          },
+          "Name": "cdk.templates",
+          "NamespaceType": "BUILD_ID",
+          "Packaging": "ZIP",
+          "Path": "CodeBuild",
+          "Type": "S3",
+        },
+        "EncryptionKey": "alias/aws/s3",
+        "Environment": Object {
+          "ComputeType": "BUILD_GENERAL1_SMALL",
+          "EnvironmentVariables": Array [
+            Object {
+              "Name": "DIFF",
+              "Type": "PLAINTEXT",
+              "Value": "true",
+            },
+            Object {
+              "Name": "DEPLOY",
+              "Type": "PLAINTEXT",
+              "Value": "true",
+            },
+            Object {
+              "Name": "STACKS",
+              "Type": "PLAINTEXT",
+              "Value": "AppNewRelicAgentCosmos AppNewRelicAgentMgtGalaxy AppNewRelicAgentMgtCiCdSolarSystem AppNewRelicAgentDevGalaxy AppNewRelicAgentDevDevSolarSystem",
+            },
+          ],
+          "Image": "aws/codebuild/standard:5.0",
+          "ImagePullCredentialsType": "CODEBUILD",
+          "PrivilegedMode": true,
+          "Type": "LINUX_CONTAINER",
+        },
+        "Name": "App-NewRelicAgent-Cdk-Deploy",
+        "ServiceRole": "arn:aws:iam::1111:role/CoreCdkMasterRole",
+        "Source": Object {
+          "BuildSpec": "{
+  \\"version\\": \\"0.2\\",
+  \\"phases\\": {
+    \\"install\\": {
+      \\"commands\\": [],
+      \\"runtime-versions\\": {
+        \\"nodejs\\": \\"14\\"
+      }
+    },
+    \\"pre_build\\": {
+      \\"commands\\": [
+        \\"npm ci\\"
+      ]
+    },
+    \\"build\\": {
+      \\"commands\\": [
+        \\"if [ $DIFF = true ]; then npx cdk diff \${STACKS}; fi;\\",
+        \\"if [ $DEPLOY = true ]; then npx cdk deploy --require-approval=never \${STACKS}; fi;\\"
+      ]
+    }
+  },
+  \\"env\\": {},
+  \\"artifacts\\": {
+    \\"base-directory\\": \\"cdk.out\\",
+    \\"files\\": [
+      \\"*.template.json\\"
+    ]
+  }
+}",
+          "Location": Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "https://git-codecommit.ap-southeast-2.",
+                Object {
+                  "Ref": "AWS::URLSuffix",
+                },
+                "/v1/repos/",
+                Object {
+                  "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttCdkRepoNameE40A1139",
+                },
+              ],
+            ],
+          },
+          "Type": "CODECOMMIT",
+        },
+        "SourceVersion": "master",
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:feature",
+            "Value": "CiCd",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Mgt",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "CiCd",
+          },
+        ],
+      },
+      "Type": "AWS::CodeBuild::Project",
+    },
+    "CodePipeline": Object {
+      "DependsOn": Array [
+        "CodePipelineRoleDefaultPolicy",
+        "CodePipelineRole",
+      ],
+      "Properties": Object {
+        "ArtifactStore": Object {
+          "Location": Object {
+            "Ref": "CodePipelineCodeArtifactBucket",
+          },
+          "Type": "S3",
+        },
+        "Name": "App-NewRelicAgent-Code-Pipeline",
+        "RoleArn": Object {
+          "Fn::GetAtt": Array [
+            "CodePipelineRole",
+            "Arn",
+          ],
+        },
+        "Stages": Array [
+          Object {
+            "Actions": Array [
+              Object {
+                "ActionTypeId": Object {
+                  "Category": "Source",
+                  "Owner": "AWS",
+                  "Provider": "CodeCommit",
+                  "Version": "1",
+                },
+                "Configuration": Object {
+                  "BranchName": "master",
+                  "PollForSourceChanges": false,
+                  "RepositoryName": Object {
+                    "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttCdkRepoNameE40A1139",
+                  },
+                },
+                "Name": "CodeCheckout",
+                "Namespace": "CodeCheckout",
+                "OutputArtifacts": Array [
+                  Object {
+                    "Name": "CodeOutput",
+                  },
+                ],
+                "RoleArn": Object {
+                  "Fn::GetAtt": Array [
+                    "CodePipelineRole",
+                    "Arn",
+                  ],
+                },
+                "RunOrder": 1,
+              },
+              Object {
+                "ActionTypeId": Object {
+                  "Category": "Source",
+                  "Owner": "AWS",
+                  "Provider": "CodeCommit",
+                  "Version": "1",
+                },
+                "Configuration": Object {
+                  "BranchName": "master",
+                  "PollForSourceChanges": false,
+                  "RepositoryName": Object {
+                    "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttCdkRepoNameE40A1139",
+                  },
+                },
+                "Name": "CdkCheckout",
+                "Namespace": "CdkCheckout",
+                "OutputArtifacts": Array [
+                  Object {
+                    "Name": "CdkOutput",
+                  },
+                ],
+                "RoleArn": Object {
+                  "Fn::GetAtt": Array [
+                    "CodePipelineRole",
+                    "Arn",
+                  ],
+                },
+                "RunOrder": 1,
+              },
+            ],
+            "Name": "Source",
+          },
+          Object {
+            "Actions": Array [
+              Object {
+                "ActionTypeId": Object {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Provider": "CodeBuild",
+                  "Version": "1",
+                },
+                "Configuration": Object {
+                  "ProjectName": Object {
+                    "Ref": "CodePipelineBuild",
+                  },
+                },
+                "InputArtifacts": Array [
+                  Object {
+                    "Name": "CodeOutput",
+                  },
+                ],
+                "Name": "CodeBuild",
+                "Namespace": "CodeBuild",
+                "RoleArn": Object {
+                  "Fn::GetAtt": Array [
+                    "CodePipelineRole",
+                    "Arn",
+                  ],
+                },
+                "RunOrder": 1,
+              },
+            ],
+            "Name": "Build",
+          },
+          Object {
+            "Actions": Array [
+              Object {
+                "ActionTypeId": Object {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Provider": "CodeBuild",
+                  "Version": "1",
+                },
+                "Configuration": Object {
+                  "EnvironmentVariables": "[{\\"name\\":\\"APP_BUILD_VERSION\\",\\"type\\":\\"PLAINTEXT\\",\\"value\\":\\"#{CodeBuild.APP_BUILD_VERSION}\\"},{\\"name\\":\\"DIFF\\",\\"type\\":\\"PLAINTEXT\\",\\"value\\":\\"true\\"},{\\"name\\":\\"DEPLOY\\",\\"type\\":\\"PLAINTEXT\\",\\"value\\":\\"true\\"},{\\"name\\":\\"STACKS\\",\\"type\\":\\"PLAINTEXT\\",\\"value\\":\\"AppNewRelicAgentDevDevSolarSystem\\"}]",
+                  "ProjectName": Object {
+                    "Ref": "CdkPipelineDeploy",
+                  },
+                },
+                "InputArtifacts": Array [
+                  Object {
+                    "Name": "CdkOutput",
+                  },
+                ],
+                "Name": "StackDeploy",
+                "RoleArn": Object {
+                  "Fn::GetAtt": Array [
+                    "CodePipelineRole",
+                    "Arn",
+                  ],
+                },
+                "RunOrder": 2,
+              },
+            ],
+            "Name": "DeployNonPrd",
+          },
+        ],
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Mgt",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "CiCd",
+          },
+        ],
+      },
+      "Type": "AWS::CodePipeline::Pipeline",
+    },
+    "CodePipelineBuild": Object {
+      "Properties": Object {
+        "Artifacts": Object {
+          "Type": "NO_ARTIFACTS",
+        },
+        "EncryptionKey": "alias/aws/s3",
+        "Environment": Object {
+          "ComputeType": "BUILD_GENERAL1_SMALL",
+          "EnvironmentVariables": Array [
+            Object {
+              "Name": "ECR_URL",
+              "Type": "PLAINTEXT",
+              "Value": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    Object {
+                      "Fn::Select": Array [
+                        4,
+                        Object {
+                          "Fn::Split": Array [
+                            ":",
+                            Object {
+                              "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttEcrRepoArn0BB148DE",
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    ".dkr.ecr.",
+                    Object {
+                      "Fn::Select": Array [
+                        3,
+                        Object {
+                          "Fn::Split": Array [
+                            ":",
+                            Object {
+                              "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttEcrRepoArn0BB148DE",
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    ".",
+                    Object {
+                      "Ref": "AWS::URLSuffix",
+                    },
+                    "/",
+                    Object {
+                      "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputRefEcrRepoE58180DE",
+                    },
+                  ],
+                ],
+              },
+            },
+          ],
+          "Image": "aws/codebuild/standard:5.0",
+          "ImagePullCredentialsType": "CODEBUILD",
+          "PrivilegedMode": true,
+          "Type": "LINUX_CONTAINER",
+        },
+        "Name": "App-NewRelicAgent-Code-Build",
+        "ServiceRole": Object {
+          "Fn::GetAtt": Array [
+            "CodePipelineRole",
+            "Arn",
+          ],
+        },
+        "Source": Object {
+          "BuildSpec": Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "{
+  \\"version\\": \\"0.2\\",
+  \\"phases\\": {
+    \\"pre_build\\": {
+      \\"commands\\": [
+        \\"aws ecr get-login-password --region ",
+                Object {
+                  "Ref": "AWS::Region",
+                },
+                " | docker login --username AWS --password-stdin https://",
+                Object {
+                  "Ref": "AWS::AccountId",
+                },
+                ".dkr.ecr.",
+                Object {
+                  "Ref": "AWS::Region",
+                },
+                ".amazonaws.com\\",
+        \\"export APP_BUILD_VERSION=$(make version)\\"
+      ]
+    },
+    \\"build\\": {
+      \\"commands\\": [
+        \\"make build\\"
+      ]
+    },
+    \\"post_build\\": {
+      \\"commands\\": [
+        \\"make push\\"
+      ]
+    }
+  },
+  \\"env\\": {
+    \\"exported-variables\\": [
+      \\"APP_BUILD_VERSION\\"
+    ]
+  }
+}",
+              ],
+            ],
+          },
+          "Location": Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "https://git-codecommit.ap-southeast-2.",
+                Object {
+                  "Ref": "AWS::URLSuffix",
+                },
+                "/v1/repos/",
+                Object {
+                  "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttCdkRepoNameE40A1139",
+                },
+              ],
+            ],
+          },
+          "Type": "CODECOMMIT",
+        },
+        "SourceVersion": "master",
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Mgt",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "CiCd",
+          },
+        ],
+      },
+      "Type": "AWS::CodeBuild::Project",
+    },
+    "CodePipelineCodeArtifactBucket": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": Object {
+          "ServerSideEncryptionConfiguration": Array [
+            Object {
+              "ServerSideEncryptionByDefault": Object {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "LoggingConfiguration": Object {
+          "LogFilePrefix": "BucketAccessLogs/",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Mgt",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "CiCd",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "CodePipelineCodeArtifactBucketPolicy": Object {
+      "Properties": Object {
+        "Bucket": Object {
+          "Ref": "CodePipelineCodeArtifactBucket",
+        },
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "s3:*",
+              "Condition": Object {
+                "Bool": Object {
+                  "aws:SecureTransport": false,
+                },
+              },
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    Object {
+                      "Fn::GetAtt": Array [
+                        "CodePipelineCodeArtifactBucket",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+              "Sid": "ForceSSLOnly",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "CodePipelineRole": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Array [
+                  "codepipeline.amazonaws.com",
+                  "codebuild.amazonaws.com",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Policies": Array [
+          Object {
+            "PolicyDocument": Object {
+              "Statement": Array [
+                Object {
+                  "Action": Array [
+                    "ssmmessages:CreateControlChannel",
+                    "ssmmessages:CreateDataChannel",
+                    "ssmmessages:OpenControlChannel",
+                    "ssmmessages:OpenDataChannel",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "*",
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "sessionManager",
+          },
+        ],
+        "Tags": Array [
+          Object {
+            "Key": "cosmos:extension",
+            "Value": "NewRelicAgent",
+          },
+          Object {
+            "Key": "cosmos:galaxy:extension",
+            "Value": "Mgt",
+          },
+          Object {
+            "Key": "cosmos:solarsystem:extension",
+            "Value": "CiCd",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CodePipelineRoleDefaultPolicy": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "codecommit:GitPull",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":codecommit:ap-southeast-2:1111:",
+                    Object {
+                      "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttCdkRepoNameE40A1139",
+                    },
+                  ],
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":logs:ap-southeast-2:1111:log-group:/aws/codebuild/",
+                      Object {
+                        "Ref": "CodePipelineBuild",
+                      },
+                    ],
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":logs:ap-southeast-2:1111:log-group:/aws/codebuild/",
+                      Object {
+                        "Ref": "CodePipelineBuild",
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            Object {
+              "Action": Array [
+                "codebuild:CreateReportGroup",
+                "codebuild:CreateReport",
+                "codebuild:UpdateReport",
+                "codebuild:BatchPutTestCases",
+                "codebuild:BatchPutCodeCoverages",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":codebuild:ap-southeast-2:1111:report-group/",
+                    Object {
+                      "Ref": "CodePipelineBuild",
+                    },
+                    "-*",
+                  ],
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "CodePipelineCodeArtifactBucket",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      Object {
+                        "Fn::GetAtt": Array [
+                          "CodePipelineCodeArtifactBucket",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "CodePipelineRole",
+                  "Arn",
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "codecommit:GetBranch",
+                "codecommit:GetCommit",
+                "codecommit:UploadArchive",
+                "codecommit:GetUploadArchiveStatus",
+                "codecommit:CancelUploadArchive",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":codecommit:ap-southeast-2:1111:",
+                    Object {
+                      "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttCdkRepoNameE40A1139",
+                    },
+                  ],
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "codebuild:BatchGetBuilds",
+                "codebuild:StartBuild",
+                "codebuild:StopBuild",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "CodePipelineBuild",
+                  "Arn",
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "CodePipelineCodeArtifactBucket",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      Object {
+                        "Fn::GetAtt": Array [
+                          "CodePipelineCodeArtifactBucket",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            Object {
+              "Action": Array [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttEcrRepoArn0BB148DE",
+              },
+            },
+            Object {
+              "Action": "ecr:GetAuthorizationToken",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ecr:PutImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::ImportValue": "AppNewRelicAgentCosmos:ExportsOutputFnGetAttEcrRepoArn0BB148DE",
+              },
+            },
+            Object {
+              "Action": Array [
+                "codebuild:BatchGetBuilds",
+                "codebuild:StartBuild",
+                "codebuild:StopBuild",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "CdkPipelineDeploy",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CodePipelineRoleDefaultPolicy",
+        "Roles": Array [
+          Object {
+            "Ref": "CodePipelineRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+}
+`;

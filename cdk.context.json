@@ -1,0 +1,6 @@
+{
+  "aws-cdk:enableDiffNoFail": "true",
+  "ssm:account=998788850705:parameterName=/Cosmos/Mgt/CiCd/VpcAzs:region=ap-southeast-2": "3",
+  "ssm:account=831324327855:parameterName=/Cosmos/Dev/Dev/VpcAzs:region=ap-southeast-2": "3",
+  "ssm:account=863289785425:parameterName=/Cosmos/Prd/Prd/VpcAzs:region=ap-southeast-2": "3"
+}
